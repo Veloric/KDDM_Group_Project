@@ -37,3 +37,7 @@ if __name__ == "__main__":
     print("Calculating Z score: ")
     print(Z)
     # Due to complexity of the data, we're unsure of what "accepted values" should be, therefore we've elected to leave the outliers alone.
+    print("Frequency of results: ")
+    for c in data2.columns:
+            print(data[c].value_counts(sort = True))
+    
