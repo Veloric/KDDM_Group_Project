@@ -5,10 +5,14 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import sklearn 
-from sklearn import cluster 
-from sklearn.cluster import KMeans 
+from sklearn import cluster
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
+from sklearn.cluster import KMeans
+from sklearn.model_selection import train_test_split
 from scipy.cluster.hierarchy import dendrogram, linkage
 from apyori import apriori
+import seaborn as sns
 
 data = pd.read_csv("data.csv")
 data.columns = ["Subject ID", "MRI ID", "Group", "Visit", "MR Delay", "M/F", "Hand", "Age", "EDUC", "SES", "MMSE", "CDR", "eTIV", "nWBV", "ASF"]
@@ -120,3 +124,29 @@ if __name__ == "__main__":
             print(f"- Confidence: {stat.confidence}, Lift: {stat.lift}")
 
         print("-" * 40)
+
+    #Training a model and outputting visualization:
+    data_clean = data.dropna(subset=['Age', 'CDR', "Group"])
+    _X = np.array(data_clean[["Age", "CDR"]].values)
+    _y = np.array(data_clean["Group"].values)
+    X_train, X_test, y_train, y_test = train_test_split(_X, _y, test_size = 0.25)
+    tree = DecisionTreeClassifier(random_state = 23)
+    tree.fit(X_train, y_train)
+    y_pred = tree.predict(X_test)
+    cm = confusion_matrix(y_test, y_pred)
+    sns.heatmap(cm,
+                annot=True,
+                fmt='g')
+    plt.ylabel('Prediction',fontsize = 13)
+    plt.xlabel('Actual',fontsize = 13)
+    plt.title('Confusion Matrix', fontsize = 17)
+    plt.show()
+    
+    accuracy = accuracy_score(y_test, y_pred)
+    print("Accuracy   :", accuracy)
+    precision = precision_score(y_test, y_pred, average = "weighted")
+    print("Precision :", precision)
+    recall = recall_score(y_test, y_pred, average= "weighted")
+    print("Recall    :", recall)
+    F1_score = f1_score(y_test, y_pred, average = "weighted")
+    print("F1-score  :", F1_score)
