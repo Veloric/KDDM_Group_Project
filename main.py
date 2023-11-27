@@ -8,6 +8,7 @@ import sklearn
 from sklearn import cluster 
 from sklearn.cluster import KMeans 
 from scipy.cluster.hierarchy import dendrogram, linkage
+from apyori import apriori
 
 data = pd.read_csv("data.csv")
 data.columns = ["Subject ID", "MRI ID", "Group", "Visit", "MR Delay", "M/F", "Hand", "Age", "EDUC", "SES", "MMSE", "CDR", "eTIV", "nWBV", "ASF"]
@@ -73,7 +74,6 @@ if __name__ == "__main__":
         plt.setp(lines,mew=4.0)
 
     plt.title("K-Cluster of Age and MMSE")
-    plt.legend()
     plt.show()
 
     #Cluster for Age and CDR
@@ -92,3 +92,31 @@ if __name__ == "__main__":
     dendrogram(linkage_data)
     plt.title("Dendrogram for Hierarchical Clustering")
     plt.show()
+
+
+    #Association- Apriori Algorithm
+    record = []
+    for i in range(0,354):
+        row_values = [str(data.values[i, j]) for j in range(0, 15)]
+        record.append(row_values)
+   
+    association_rules = apriori(record, min_support=0.50, min_confidence=0.7, min_lift=1.2, min_length=2)
+    association_results = list(association_rules)
+
+    print(f"Number of Association Rules: {len(association_results)}")
+
+    for i, rule in enumerate(association_results):
+        print(f"\nRule {i + 1}:")
+        print(f"Items: {rule.items}")
+        print(f"Support: {rule.support}")
+        
+        a = ', '.join(rule.ordered_statistics[0].items_base)
+        c = ', '.join(rule.ordered_statistics[0].items_add)
+        
+        print(f"If {a} -> {c}")
+
+        print("Ordered Statistics:")
+        for stat in rule.ordered_statistics:
+            print(f"- Confidence: {stat.confidence}, Lift: {stat.lift}")
+
+        print("-" * 40)
